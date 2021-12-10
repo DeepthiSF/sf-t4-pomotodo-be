@@ -77,6 +77,7 @@ module.exports = class TodoDataService {
         // The below method is using 'scan'
         existingTodoData = await dynamoClient.scan({ TableName }).promise()
           .then((data) => {
+            console.log(data.Items[0])
             return data.Items[0];
           })
           .catch((error) => {
@@ -199,23 +200,37 @@ module.exports = class TodoDataService {
         TableName,
         Key: {
           id: "0"
-        }
-        
+        },
+        ExpressionAttributeNames: {
+          "#oldName": "name",
+        }, 
+         // Setting an attribute name for the new order value (options.order) with which we want to update the current attribute 'order'   
+        ExpressionAttributeValues: {
+          ":newName": options.name
+        },
+        // Update the current attribute with the new attribute value
+        UpdateExpression: "set #oldName = :newName"
       }
 
       // Check the "tododata" table for the tododata item, and set it to "existingTodo"
-      // let existingTodo = ...
+      let existingTodo = await dynamoClient.get(params).promise()
+            .then((data) => {
+              console.log(data.Item)
+              return data.Item
+            })
 
-      for (let key in options) {
-        existingTodo.todos[id][key] = options[key];
-      }
+      console.log(existingTodo)
+      
+      // for (let key in options) {
+      //   existingTodo.todos[id][key] = options[key];
+      // }
 
-      params = {
-        TableName,
-        Item: {
-          ...existingTodo
-        }
-      }
+      // params = {
+      //   TableName,
+      //   Item: {
+      //     ...existingTodo
+      //   }
+      // }
 
       // Replace the existing tododata item with the updated one
     } catch (error) {
