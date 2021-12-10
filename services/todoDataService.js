@@ -1,5 +1,6 @@
 // Calling .config() will allow dotenv to pull environment variables from our .env file...
 require('dotenv').config();
+// const AWS = require('aws-sdk');
 // ...made available from process.env
 const TableName = process.env.TABLE_NAME;
 // You'll need to call dynamoClient methods to envoke CRUD operations on the DynamoDB table
@@ -17,45 +18,131 @@ module.exports = class TodoDataService {
     };
 
     try {
-      // Check the "tododata" table for existing a tododata item
-      // let existingTodoData = ...
-      
+      // Check the "tododata" table for existing a tododata item 
+      //let existingTodoData = documentClient.scan(params, function(err, date){
+      //   if (err) console.log(err);
+      //   else console.log(data);
+      // });  
+      //var documentClient = new AWS.DynamoDB.DocumentClient();
+
+      // let existingTodoData = await dynamoClient.scan(params).promise()
+      // .then((data)=>{
+      //   if (err) console.log(err);
+      //   else console.log(data);
+      // });
+
+      let existingTodoData = await dynamoClient.scan(params).promise()
+        .then((data) => {
+          console.log("Here", data)
+          return data;
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+
+        //console.log("Here", existingTodoData)
+
       // no tododata exists yet
       if (existingTodoData.Items.length === 0) {
         const newTodoData = {
+          id: "0",
           order: [],
           todos: {}
         };
-        newTodoData.id = "0";
+
+        // Here 'tododataId' is the main id of the whole tododata item which in this case is '0'
+       // newTodoData.id = "0";
         newTodoData.order.push(id);
         newTodoData.todos[id] = todo;
-        
+
         // Add a new tododata placeholder item to the "tododata" table
         const params = {
           TableName,
           Item: newTodoData,
         }
+
+        // Now add the new todo data to the deepthi-tododdata table in aws dynamo db
+        await dynamoClient.put(params).promise()
+          // .then((data) => {
+          //   console.log(data);
+            
+          // })
+          // .catch((error) => {
+          //   console.log(error)
+          // });
         // ...
 
+        // We can use 'scan' or 'get' to get the items from the db
+        // 'Scan' returns Items and 'get' returns item
+        // The below method is using 'scan'
+        existingTodoData = await dynamoClient.scan({ TableName }).promise()
+          .then((data) => {
+            console.log(data);
+            return data.Items[0];
+          })
+          .catch((error) => {
+            console.log(error)
+          });
         // Return the newly created tododata item
+        console.log("This is the latest data", existingTodoData);
+        return existingTodoData;
+
+         // The below method is using 'get'. 
+        //  return await dynamoClient.get({ 
+        //      TableName,
+        //      Key: {
+        //       id: "0"
+        //      }
+        //   }).promise()
+        //   .then((data) => {
+        //     console.log("Latest data:", data.Item);
+        //     return data.Item;
+        //   }).catch((error) => {
+        //     console.log(error)
+        //   });
+        
+
+        
+ 
+
       } else { // a tododata item already exist
         existingTodoData = existingTodoData.Items[0];
         existingTodoData.order.push(id);
         existingTodoData.todos[id] = todo;
-        
+
         // Replace the existing tododata item with the new one, created in the above three lines
         const params = {
           TableName,
           Item: existingTodoData,
         }
+
+        // Now add the new todo data to the deepthi-tododdata table in aws dynamo db
+        await dynamoClient.put(params).promise()
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((error) => {
+            console.log(error)
+          });
         // ...
 
+        existingTodoData = await dynamoClient.scan(params).promise()
+          .then((data) => {
+            console.log(data);
+            return data;
+          })
+          .catch((error) => {
+            console.log(error)
+          });
         // Return the newly created tododata item
+        return existingTodoData;
+
       }
     } catch (error) {
-      console.error(error);
+        console.error(error);
       return error;
     }
+
   }
 
   static async getTodos() {
@@ -105,6 +192,7 @@ module.exports = class TodoDataService {
         Key: {
           id: "0"
         }
+        
       }
 
       // Check the "tododata" table for the tododata item, and set it to "existingTodo"
@@ -170,7 +258,7 @@ module.exports = class TodoDataService {
       }
 
       let existingTodo = await dynamoClient.scan(params).promise().then((data) => {
-          return data.Items[0];
+        return data.Items[0];
       });
 
       existingTodo.order = existingTodo.order.filter((orderId) => {
@@ -181,7 +269,7 @@ module.exports = class TodoDataService {
           delete existingTodo.todos[id];
         }
       }
-      
+
       params = {
         TableName,
         Item: {

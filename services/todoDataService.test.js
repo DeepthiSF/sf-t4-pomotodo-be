@@ -1,4 +1,3 @@
-require('dotenv').config();
 const todoDataService = require("./todoDataService");
 const dynamoClient = require("../db");
 const TableName = process.env.TABLE_NAME;

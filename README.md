@@ -31,7 +31,7 @@ Two test suites have been created to ensure a reliable refactor of this applicat
 
 ```json
 {
-  "id" : "0"
+  "tododataId" : "0"
   "order": [
     "57f78108-4704-41a9-989b-3721ceedfad1"
   ],
@@ -81,7 +81,7 @@ Response Body:
 
 ```json
 {
-  "id" : "0"
+  "tododataId" : "0"
   "order": [
     "57f78108-4704-41a9-989b-3721ceedfad1"
   ],
@@ -111,7 +111,7 @@ GET /api/todo-data
 Response Body:
 ```json
 {
-  "id" : "0"
+  "tododataId" : "0"
   "order": [
     "57f78108-4704-41a9-989b-3721ceedfad1",
     "21f3e843-b7c0-4ddb-8df4-0111117bf2d8"
@@ -148,7 +148,7 @@ PATCH /api/todo-data
 Request Body: 
 ```json
 {
-  "id" : "0"
+  "tododataId" : "0"
   "order": [
     "d6b2e215-f095-402e-bf31-f75154a69329",
     "e61cf002-5fa4-41a2-9ace-a7bf4a284d33",
