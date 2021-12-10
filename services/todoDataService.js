@@ -77,14 +77,12 @@ module.exports = class TodoDataService {
         // The below method is using 'scan'
         existingTodoData = await dynamoClient.scan({ TableName }).promise()
           .then((data) => {
-            console.log(data);
             return data.Items[0];
           })
           .catch((error) => {
             console.log(error)
           });
         // Return the newly created tododata item
-        console.log("This is the latest data", existingTodoData);
         return existingTodoData;
 
          // The below method is using 'get'. 
@@ -99,11 +97,7 @@ module.exports = class TodoDataService {
         //     return data.Item;
         //   }).catch((error) => {
         //     console.log(error)
-        //   });
-        
-
-        
- 
+        //   });  
 
       } else { // a tododata item already exist
         existingTodoData = existingTodoData.Items[0];
@@ -118,18 +112,19 @@ module.exports = class TodoDataService {
 
         // Now add the new todo data to the deepthi-tododdata table in aws dynamo db
         await dynamoClient.put(params).promise()
-          .then((data) => {
-            console.log(data);
-          })
-          .catch((error) => {
-            console.log(error)
-          });
+          // .then((data) => {
+          //   console.log(data);
+          // })
+          // .catch((error) => {
+          //   console.log(error)
+          // });
         // ...
 
-        existingTodoData = await dynamoClient.scan(params).promise()
+        existingTodoData = await dynamoClient.scan({ TableName }).promise()
           .then((data) => {
-            console.log(data);
-            return data;
+            // console.log(data.Items[0]);
+            // console.log(data.Items[0].order.length)
+            return data.Items[0];
           })
           .catch((error) => {
             console.log(error)
@@ -147,12 +142,19 @@ module.exports = class TodoDataService {
 
   static async getTodos() {
     try {
-      const params = {
-        TableName,
-        Key: {
-          id: "0"
-        }
-      }
+      // const params = {
+      //   TableName,
+      //   Key: {
+      //     id: "0"
+      //   }
+      // }
+      return await dynamoClient.scan({ TableName }).promise()
+          .then((data) => {
+            return data.Items[0];
+          })
+          .catch((error) => {
+            console.log(error)
+          });
 
       // Check the "tododata" table for the tododata item, and return it
     } catch (error) {
