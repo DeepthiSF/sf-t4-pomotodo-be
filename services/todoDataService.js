@@ -40,7 +40,7 @@ module.exports = class TodoDataService {
           console.log(error)
         });
 
-        //console.log("Here", existingTodoData)
+      //console.log("Here", existingTodoData)
 
       // no tododata exists yet
       if (existingTodoData.Items.length === 0) {
@@ -51,7 +51,7 @@ module.exports = class TodoDataService {
         };
 
         // Here 'tododataId' is the main id of the whole tododata item which in this case is '0'
-       // newTodoData.id = "0";
+        // newTodoData.id = "0";
         newTodoData.order.push(id);
         newTodoData.todos[id] = todo;
 
@@ -63,13 +63,13 @@ module.exports = class TodoDataService {
 
         // Now add the new todo data to the deepthi-tododdata table in aws dynamo db
         await dynamoClient.put(params).promise()
-          // .then((data) => {
-          //   console.log(data);
-            
-          // })
-          // .catch((error) => {
-          //   console.log(error)
-          // });
+        // .then((data) => {
+        //   console.log(data);
+
+        // })
+        // .catch((error) => {
+        //   console.log(error)
+        // });
         // ...
 
         // We can use 'scan' or 'get' to get the items from the db
@@ -86,7 +86,7 @@ module.exports = class TodoDataService {
         // Return the newly created tododata item
         return existingTodoData;
 
-         // The below method is using 'get'. 
+        // The below method is using 'get'. 
         //  return await dynamoClient.get({ 
         //      TableName,
         //      Key: {
@@ -113,12 +113,12 @@ module.exports = class TodoDataService {
 
         // Now add the new todo data to the deepthi-tododdata table in aws dynamo db
         await dynamoClient.put(params).promise()
-          // .then((data) => {
-          //   console.log(data);
-          // })
-          // .catch((error) => {
-          //   console.log(error)
-          // });
+        // .then((data) => {
+        //   console.log(data);
+        // })
+        // .catch((error) => {
+        //   console.log(error)
+        // });
         // ...
 
         existingTodoData = await dynamoClient.scan({ TableName }).promise()
@@ -135,7 +135,7 @@ module.exports = class TodoDataService {
 
       }
     } catch (error) {
-        console.error(error);
+      console.error(error);
       return error;
     }
 
@@ -150,12 +150,12 @@ module.exports = class TodoDataService {
       //   }
       // }
       return await dynamoClient.scan({ TableName }).promise()
-          .then((data) => {
-            return data.Items[0];
-          })
-          .catch((error) => {
-            console.log(error)
-          });
+        .then((data) => {
+          return data.Items[0];
+        })
+        .catch((error) => {
+          console.log(error)
+        });
 
       // Check the "tododata" table for the tododata item, and return it
     } catch (error) {
@@ -172,12 +172,12 @@ module.exports = class TodoDataService {
           id: "0"
         },
         // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.html
-        
+
         // Setting a name to the current attribute that u want to update. In this case we want to update the 'order'
         ExpressionAttributeNames: {
           "#oldOrder": "order"
-        }, 
-         // Setting an attribute name for the new order value (options.order) with which we want to update the current attribute 'order'   
+        },
+        // Setting an attribute name for the new order value (options.order) with which we want to update the current attribute 'order'   
         ExpressionAttributeValues: {
           ":newOrder": options.order
         },
@@ -200,39 +200,30 @@ module.exports = class TodoDataService {
         TableName,
         Key: {
           id: "0"
-        },
-        ExpressionAttributeNames: {
-          "#oldName": "name",
-        }, 
-         // Setting an attribute name for the new order value (options.order) with which we want to update the current attribute 'order'   
-        ExpressionAttributeValues: {
-          ":newName": options.name
-        },
-        // Update the current attribute with the new attribute value
-        UpdateExpression: "set #oldName = :newName"
+        }
       }
 
       // Check the "tododata" table for the tododata item, and set it to "existingTodo"
       let existingTodo = await dynamoClient.get(params).promise()
-            .then((data) => {
-              console.log(data.Item)
-              return data.Item
-            })
+        .then((data) => {
+          console.log(data.Item)
+          return data.Item
+        })
 
-      console.log(existingTodo)
-      
-      // for (let key in options) {
-      //   existingTodo.todos[id][key] = options[key];
-      // }
+      for (let key in options) {
+        existingTodo.todos[id][key] = options[key];
+      }
 
-      // params = {
-      //   TableName,
-      //   Item: {
-      //     ...existingTodo
-      //   }
-      // }
+      //console.log(existingTodo)
+
+      params = {
+        TableName,
+        Item: existingTodo
+      }
 
       // Replace the existing tododata item with the updated one
+      await dynamoClient.put(params).promise();
+            
     } catch (error) {
       console.error(error);
       return error;
@@ -249,7 +240,11 @@ module.exports = class TodoDataService {
       }
 
       // Check the "tododata" table for the tododata item, and set it to "existingTodo"
-      // let existingTodo = ...
+      let existingTodo = await dynamoClient.scan(params).promise()
+        .then((data) => {
+          console.log(data.Items[0])
+          return data.Items[0];
+        })
 
       existingTodo.order = existingTodo.order.filter((orderId) => {
         return orderId !== id
@@ -264,7 +259,9 @@ module.exports = class TodoDataService {
         }
       }
 
-      // Replace the existing tododata item with the updated one
+       // Replace the existing tododata item with the updated one
+      await dynamoClient.put(params).promise();
+     
     } catch (error) {
       console.error(error);
       return error;
